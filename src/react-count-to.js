@@ -1,72 +1,55 @@
+/*
+ Forked from @MicheleBertoli's react-count-to component at:
+ https://github.com/MicheleBertoli/react-count-to/
+ */
 import React from 'react';
 
-const CountTo = React.createClass({
-
-  propTypes: {
-    from: React.PropTypes.number,
-    to: React.PropTypes.number.isRequired,
-    speed: React.PropTypes.number.isRequired,
-    delay: React.PropTypes.number,
-    onComplete: React.PropTypes.func,
-    digits: React.PropTypes.number,
-    className: React.PropTypes.string,
-  },
-
-  getInitialState() {
-    return {
-      counter: this.props.from || 0,
-    };
-  },
-
+class CountTo extends React.Component{
+  constructor(props) {
+    super(props);
+    this.formatter = (props.formatter) ? props.formatter : (value) => {return value};
+  }
   componentDidMount() {
     this.start(this.props);
-  },
-
+  };
   componentWillReceiveProps(nextProps) {
     this.start(nextProps);
-  },
-
-  componentWillUnmount() {
-    this.clear();
-  },
-
-  start(props) {
-    this.clear();
-    this.setState(this.getInitialState(), () => {
-      const delay = this.props.delay || 100;
-      this.loopsCounter = 0;
-      this.loops = Math.ceil(props.speed / delay);
-      this.increment = (props.to - this.state.counter) / this.loops;
-      this.interval = setInterval(this.next.bind(this, props), delay);
-    });
-  },
-
-  next(props) {
-    if (this.loopsCounter < this.loops) {
-      this.loopsCounter++;
+  };
+  next() {
+    if (this.state.counter < this.state.to) {
+      let step = Math.round(this.state.counter + this.state.increment);
       this.setState({
-        counter: this.state.counter + this.increment,
+        counter: (step>this.state.to) ? this.state.to : step
       });
-    } else {
-      this.clear();
-      if (props.onComplete) {
-        props.onComplete();
-      }
+      window.requestAnimationFrame(this.next.bind(this));
     }
-  },
-
-  clear() {
-    clearInterval(this.interval);
-  },
-
+  };
+  start(props) {
+    this.state = {
+      counter: (this.props.hasOwnProperty('from')) ? this.props.from : 0,
+      delay: (this.props.hasOwnProperty('delay')) ? this.props.delay : 100,
+      to: (this.props.hasOwnProperty('to')) ? this.props.to : 0
+    };
+    this.state['loops'] = Math.ceil(props.speed / this.state.delay);
+    this.state['increment'] = (props.to - this.state.counter) / this.state.loops;
+    window.requestAnimationFrame(this.next.bind(this));
+  };
   render() {
+    let counter = this.state ? this.state.counter : 0;
     return (
-      <span className={this.props.className}>
-        {this.state.counter.toFixed(this.props.digits)}
-      </span>
+        <span>
+          {this.formatter(counter)}
+        </span>
     );
-  },
+  };
+};
 
-});
+CountTo.propTypes = {
+  from: React.PropTypes.number,
+  to: React.PropTypes.number.isRequired,
+  speed: React.PropTypes.number.isRequired,
+  delay: React.PropTypes.number,
+  formatter: React.PropTypes.func
+};
 
 export default CountTo;
