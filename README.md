@@ -3,7 +3,7 @@
 React Count To
 ==============
 
-Animated counter  component for [React.js](http://facebook.github.io/react/)
+Animated counter component for [React.js](http://facebook.github.io/react/)
 
 Installation
 ------------
